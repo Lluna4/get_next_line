@@ -7,7 +7,7 @@
 
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE	(int)1024
+#  define BUFFER_SIZE	(int)10
 # endif
 
 size_t	ft_strlen(const char *a)
@@ -153,7 +153,7 @@ void	*ft_memchr(const void *s, int c, size_t size)
 	while (size > 0)
 	{
 		if (*(unsigned char *)s == chr)
-			return (((unsigned char *)s));
+			return (((unsigned char *)++s));
 		size--;
 		s++;
 	}
@@ -172,12 +172,15 @@ char *get_next_line(int fd)
 	char *buffer_buffer;
 	static char *next;
 	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));	
-	read(fd, buffer, BUFFER_SIZE);
+	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	printf("next<%s>", next);	
+	if (!read(fd, buffer, BUFFER_SIZE) && !next)
+		return(NULL); //falta hacer free
 	if (next)
 		buffer = next;
-	if (ft_strchr(buffer, '\n') == 0)
+	if (ft_strchr(buffer, '\n') == 0 || ft_strchr(buffer, '\0') == 0)
 	{
+		printf("buff<%s>", buffer);
 		while(ft_strchr(buffer, '\n') == 0 || ft_strchr(buffer, '\0') == 0)
 		{
 			read(fd, buffer_buffer, BUFFER_SIZE);
@@ -186,11 +189,15 @@ char *get_next_line(int fd)
 			if (ft_strchr(buffer, '\n') == 0)
 				buffer = ft_strjoin(buffer, buffer_buffer);
 		}
+		next = ft_strdup(ft_strchr(buffer, '\n'));
+	}
+	else
+	{
+		//printf("<%s>", buffer);
+		next = ft_strdup(ft_strchr(buffer, '\n'));
+		buffer = ft_substr(buffer, 0, ft_strlen(buffer) - ft_strlen(next));
 	}
 	free(buffer_buffer);
-	next = ft_strdup(ft_strchr(buffer, '\n'));
-	if (next[0] == '\n')
-		next = NULL;
 	return(buffer);
 }
 
@@ -200,4 +207,6 @@ int main(void)
     printf("%s", get_next_line(fd));
     printf("%s", get_next_line(fd));
     printf("%s", get_next_line(fd));
+ 	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
 }
