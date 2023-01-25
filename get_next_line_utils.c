@@ -144,3 +144,25 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	}
 	return (ret);
 }
+
+void	*ft_memchr(const void *s, int c, size_t size)
+
+{
+	unsigned char	chr;
+
+	chr = (unsigned char)c;
+	while (size > 0)
+	{
+		if (*(unsigned char *)s == chr)
+			return (((unsigned char *)++s));
+		size--;
+		s++;
+	}
+	return (0);
+}
+
+char	*ft_strchr(const char *a, int ch)
+
+{
+	return (ft_memchr(a, ch, ft_strlen(a) + 1));
+}

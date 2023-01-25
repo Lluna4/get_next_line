@@ -29,7 +29,10 @@ void    *ft_calloc(size_t count, size_t size);
 char	*ft_strdup(const char *s1);
 size_t	ft_strlcpy(char *dest, const char *src, size_t size);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
-char    *get_next_line(int fd);
+void	*ft_memchr(const void *s, int c, size_t size);
+char	*ft_strchr(const char *a, int ch);
 char	*ft_strjoin(char const *s1, char const *s2);
+char    *get_next_line(int fd);
+
 
 #endif

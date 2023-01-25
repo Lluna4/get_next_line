@@ -7,7 +7,7 @@
 
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE	(int)1024
+#  define BUFFER_SIZE	(int)4
 # endif
 
 size_t	ft_strlen(const char *a)
@@ -160,22 +160,6 @@ void	*ft_memchr(const void *s, int c, size_t size)
 	return (0);
 }
 
-void	*ft_memchr(const void *s, int c, size_t size)
-
-{
-	unsigned char	chr;
-
-	chr = (unsigned char)c;
-	while (size > 0)
-	{
-		if (*(unsigned char *)s == chr)
-			return (((unsigned char *)++s));
-		size--;
-		s++;
-	}
-	return (0);
-}
-
 char	*ft_strchr(const char *a, int ch)
 
 {
@@ -187,48 +171,48 @@ char *get_next_line(int fd)
 	char *buffer;
 	char *buffer_buffer;
 	static char *next;
+	int len;
 
 	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));	
-	if (!read(fd, buffer, BUFFER_SIZE) && !next)
-		return(NULL); //falta hacer free
+	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (next)
 		buffer = next;
-	if (ft_strchr(buffer, '\n') == 0 || ft_strchr(buffer, '\0') == 0)
+	else 
 	{
-		printf("buff<%s>", buffer);
-		while(ft_strchr(buffer, '\n') == 0 || ft_strchr(buffer, '\0') == 0)
+		if (!read(fd, buffer, BUFFER_SIZE) && !next)
 		{
-			if (!read(fd, buffer_buffer, BUFFER_SIZE))
+			free(buffer);
+			free(buffer_buffer);
+			return(NULL);
+		}
+	}
+	while (1)
+	{
+		if (ft_strchr(buffer, '\n') != 0)
+		{
+			if (ft_strchr(buffer, '\n') != 0)
 			{
-				printf("TEST");
+				next = ft_strdup(ft_strchr(buffer, '\n'));
+				len = ft_strlen(buffer) - ft_strlen(next);
+				buffer = ft_substr(buffer, 0, len);
 				break;
 			}
-			if (buffer_buffer == NULL)
+			else
+			{
 				break;
-			if (ft_strchr(buffer, '\n') == 0)
-				buffer = ft_strjoin(buffer, buffer_buffer);
+			}
 		}
-		next = ft_strdup(ft_strchr(buffer, '\n'));
+		read(fd, buffer_buffer, BUFFER_SIZE);
+		buffer = ft_strjoin(buffer, buffer_buffer);
 	}
-	else
-	{
-		//printf("<%s>", buffer);
-		next = ft_strdup(ft_strchr(buffer, '\n'));
-		buffer = ft_substr(buffer, 0, ft_strlen(buffer) - ft_strlen(next));
-	}
-	if (buffer_buffer)
-		free(buffer_buffer);
-	printf("<%s>", buffer);
-	return(buffer);
+	return (buffer);
 }
 
 int main(void)
 {
     int fd = open("test.txt", O_RDONLY);
     printf("%s", get_next_line(fd));
-    printf("%s", get_next_line(fd));
-    printf("%s", get_next_line(fd));
- 	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
 	printf("%s", get_next_line(fd));
 }

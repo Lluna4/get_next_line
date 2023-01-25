@@ -14,20 +14,42 @@
 
 char *get_next_line(int fd)
 {
-	char		*buffer;
-    static char *line;
-	int index;
-    
-	index = 0;
-	buffer = ft_calloc((BUFFER_SIZE + 1), sizeof(char));
-	if (!buffer)
-		return(NULL);
-	read(fd, buffer, BUFFER_SIZE);
-    //printf("%s", buffer);
-    line = ft_strdup(buffer);
-	while (buffer[index] != '\n' && buffer[index] != '\0')
-		index++;
-    line = line + index;
-	free(buffer);
-	return(line);
+	char *buffer;
+	char *buffer_buffer;
+	static char *next;
+	int len;
+
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (next)
+		buffer = next;
+	else 
+	{
+		if (!read(fd, buffer, BUFFER_SIZE) && !next)
+		{
+			free(buffer);
+			free(buffer_buffer);
+			return(NULL);
+		}
+	}
+	while (1)
+	{
+		if (ft_strchr(buffer, '\n') != 0)
+		{
+			if (ft_strchr(buffer, '\n') != 0)
+			{
+				next = ft_strdup(ft_strchr(buffer, '\n'));
+				len = ft_strlen(buffer) - ft_strlen(next);
+				buffer = ft_substr(buffer, 0, len);
+				break;
+			}
+			else
+			{
+				break;
+			}
+		}
+		read(fd, buffer_buffer, BUFFER_SIZE);
+		buffer = ft_strjoin(buffer, buffer_buffer);
+	}
+	return (buffer);
 }
