@@ -7,7 +7,7 @@
 
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE	(int)4
+#  define BUFFER_SIZE	(int)1
 # endif
 
 size_t	ft_strlen(const char *a)
@@ -173,13 +173,15 @@ char *get_next_line(int fd)
 	static char *next;
 	int len;
 
+	if (fd < 0)
+		return (NULL);
 	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
 	if (next)
 		buffer = next;
 	else 
 	{
-		if (!read(fd, buffer, BUFFER_SIZE) && !next)
+		if (read(fd, buffer, BUFFER_SIZE) == -1 && !next)
 		{
 			free(buffer);
 			free(buffer_buffer);
@@ -190,29 +192,26 @@ char *get_next_line(int fd)
 	{
 		if (ft_strchr(buffer, '\n') != 0)
 		{
-			if (ft_strchr(buffer, '\n') != 0)
-			{
-				next = ft_strdup(ft_strchr(buffer, '\n'));
-				len = ft_strlen(buffer) - ft_strlen(next);
-				buffer = ft_substr(buffer, 0, len);
-				break;
-			}
-			else
-			{
-				break;
-			}
+			next = ft_strchr(buffer, '\n');
+			len = ft_strlen(buffer) - ft_strlen(next);
+			buffer = ft_substr(buffer, 0, len);
+			break;
 		}
-		read(fd, buffer_buffer, BUFFER_SIZE);
+		if (!read(fd, buffer_buffer, BUFFER_SIZE))
+			break;
 		buffer = ft_strjoin(buffer, buffer_buffer);
 	}
+	free(buffer_buffer);
 	return (buffer);
 }
 
 int main(void)
 {
-    int fd = open("test.txt", O_RDONLY);
-    printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
+    int fd = open("only_nl.txt", O_RDONLY);
+	int a = 0;
+	while (a < 1)
+	{
+		printf("%s", get_next_line(fd));
+		a++;
+	}
 }

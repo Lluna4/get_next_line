@@ -6,7 +6,7 @@
 /*   By: ltranca- <ltranca-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/04 17:45:25 by ltranca-          #+#    #+#             */
-/*   Updated: 2023/01/18 15:23:04 by ltranca-         ###   ########.fr       */
+/*   Updated: 2023/01/27 17:56:56 by ltranca-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@ size_t	ft_strlen(const char *a)
 
 {
 	size_t	n;
+	if (!a)
+		return(0);
 
 	n = 0;
 	while (*a)
@@ -108,28 +110,46 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 	char	*a;
 
 	if (start >= ft_strlen(s))
+	{
+		free((void *)s);
 		return (ft_strdup(""));
+	}
 	if (ft_strlen(&s[start]) < len)
 		len = ft_strlen(&s[start]);
 	a = ft_calloc(len + 1, sizeof(char));
 	if (!a)
+	{
+		free((void *)s);
 		return (0);
+	}
 	ft_strlcpy(a, &s[start], len + (size_t)1);
+	free((void *)s);
 	return (a);
 }	
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char *s1, char const *s2)
 
 {
 	char	*ret;
 	int		n;
-
+	int len;
+	if (!s1)
+		s1 = ft_strdup("");
+	if (!s1)
+		return (NULL);
+	len = ft_strlen(s1);
 	n = -1;
 	if (*s1 == '\0' && *s2 == '\0')
+	{
+		free((void *)s1);
 		return (ft_strdup(""));
+	}
 	ret = ft_calloc(ft_strlen(s1) + ft_strlen(s2) + 1, sizeof(char));
 	if (!ret)
+	{
+		free((void *)s1);
 		return (0);
+	}
 	while (*s1 != '\0')
 	{
 		n++;
@@ -142,6 +162,8 @@ char	*ft_strjoin(char const *s1, char const *s2)
 		ret[n] = *s2;
 		s2++;
 	}
+	s1 = s1 - len;
+	free((void *)s1);
 	return (ret);
 }
 

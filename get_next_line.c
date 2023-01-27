@@ -6,7 +6,7 @@
 /*   By: ltranca- <ltranca-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/04 16:47:01 by ltranca-          #+#    #+#             */
-/*   Updated: 2023/01/18 15:26:31 by ltranca-         ###   ########.fr       */
+/*   Updated: 2023/01/27 17:58:49 by ltranca-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,38 @@ char *get_next_line(int fd)
 	static char *next;
 	int len;
 
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	if (fd < 0)
+		return (NULL);
 	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	if (next)
-		buffer = next;
+	if (!buffer_buffer)
+		return(NULL);
+	if (next && ft_strlen(next) > 0)
+	{
+		buffer = ft_strdup(next);
+		if (!buffer)
+		{
+			free(buffer_buffer);
+			return (NULL);
+		}
+	}
 	else 
 	{
-		if (!read(fd, buffer, BUFFER_SIZE) && !next)
+		buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+		if (!buffer)
 		{
-			free(buffer);
 			free(buffer_buffer);
+			return (NULL);
+		}
+		if (read(fd, buffer, BUFFER_SIZE) == -1 && !next)
+		{
+			free(buffer_buffer);
+			free(buffer);
+			return(NULL);
+		}
+		if (ft_strlen(buffer) == 0)
+		{
+			free(buffer_buffer);
+			free(buffer);
 			return(NULL);
 		}
 	}
@@ -36,20 +58,35 @@ char *get_next_line(int fd)
 	{
 		if (ft_strchr(buffer, '\n') != 0)
 		{
-			if (ft_strchr(buffer, '\n') != 0)
+			if (next)
+				free(next);
+			next = ft_strdup(ft_strchr(buffer, '\n'));
+			if (!next)
 			{
-				next = ft_strdup(ft_strchr(buffer, '\n'));
-				len = ft_strlen(buffer) - ft_strlen(next);
-				buffer = ft_substr(buffer, 0, len);
-				break;
+				free(buffer_buffer);
+				free(buffer);
+				return(NULL);
 			}
-			else
-			{
-				break;
-			}
+			len = ft_strlen(buffer) - ft_strlen(next);
+			buffer = ft_substr(buffer, 0, len);
+			break;
 		}
-		read(fd, buffer_buffer, BUFFER_SIZE);
+		if (!read(fd, buffer_buffer, BUFFER_SIZE))
+			break;
 		buffer = ft_strjoin(buffer, buffer_buffer);
+		if (!buffer)
+		{
+			free(buffer_buffer);
+			free(buffer);
+			return (NULL);
+		}
 	}
+	if (ft_strlen(buffer) == 0)
+	{
+		free(buffer_buffer);
+		free(buffer);
+		return(NULL);
+	}
+	free(buffer_buffer);
 	return (buffer);
 }

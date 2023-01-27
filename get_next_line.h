@@ -6,7 +6,7 @@
 /*   By: ltranca- <ltranca-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/04 16:51:17 by ltranca-          #+#    #+#             */
-/*   Updated: 2023/01/18 15:23:16 by ltranca-         ###   ########.fr       */
+/*   Updated: 2023/01/27 16:57:13 by ltranca-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ size_t	ft_strlcpy(char *dest, const char *src, size_t size);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
 void	*ft_memchr(const void *s, int c, size_t size);
 char	*ft_strchr(const char *a, int ch);
-char	*ft_strjoin(char const *s1, char const *s2);
+char	*ft_strjoin(char *s1, char const *s2);
 char    *get_next_line(int fd);
 
 
