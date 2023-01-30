@@ -12,6 +12,13 @@
 
 #include "get_next_line.h"
 
+static char *free_all(char *buffer_buffer, char *buffer)
+{
+	free(buffer_buffer);
+	free(buffer);
+	return(NULL);
+}
+
 char *get_next_line(int fd)
 {
 	char *buffer;
@@ -42,17 +49,9 @@ char *get_next_line(int fd)
 			return (NULL);
 		}
 		if (read(fd, buffer, BUFFER_SIZE) == -1 && !next)
-		{
-			free(buffer_buffer);
-			free(buffer);
-			return(NULL);
-		}
+			return(free_all(buffer_buffer, buffer));
 		if (ft_strlen(buffer) == 0)
-		{
-			free(buffer_buffer);
-			free(buffer);
-			return(NULL);
-		}
+			return(free_all(buffer_buffer, buffer));
 	}
 	while (1)
 	{
@@ -62,11 +61,7 @@ char *get_next_line(int fd)
 				free(next);
 			next = ft_strdup(ft_strchr(buffer, '\n'));
 			if (!next)
-			{
-				free(buffer_buffer);
-				free(buffer);
-				return(NULL);
-			}
+				return(free_all(buffer_buffer, buffer));
 			len = ft_strlen(buffer) - ft_strlen(next);
 			buffer = ft_substr(buffer, 0, len);
 			break;
@@ -75,18 +70,10 @@ char *get_next_line(int fd)
 			break;
 		buffer = ft_strjoin(buffer, buffer_buffer);
 		if (!buffer)
-		{
-			free(buffer_buffer);
-			free(buffer);
-			return (NULL);
-		}
+			return(free_all(buffer_buffer, buffer));
 	}
 	if (ft_strlen(buffer) == 0)
-	{
-		free(buffer_buffer);
-		free(buffer);
-		return(NULL);
-	}
+		return(free_all(buffer_buffer, buffer));
 	free(buffer_buffer);
 	return (buffer);
 }
