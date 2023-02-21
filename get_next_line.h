@@ -6,7 +6,7 @@
 /*   By: ltranca- <ltranca-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/04 16:51:17 by ltranca-          #+#    #+#             */
-/*   Updated: 2023/01/27 16:57:13 by ltranca-         ###   ########.fr       */
+/*   Updated: 2023/02/21 16:14:16 by ltranca-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 void	*ft_memchr(const void *s, int c, size_t size);
 char	*ft_strchr(const char *a, int ch);
 char	*ft_strjoin(char *s1, char const *s2);
+int	    ft_strncmp(const char *a, const char *b, int ch);
+char	**ft_split(char const *s, char c);
 char    *get_next_line(int fd);
 
 
