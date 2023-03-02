@@ -2,18 +2,18 @@
 # include <unistd.h>
 # include <limits.h>
 # include <string.h>
-# include <stdio.h>
 # include <fcntl.h>
-
+# include <stdio.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE	(int)1024
+#  define BUFFER_SIZE	(int)1042
 # endif
-
 size_t	ft_strlen(const char *a)
 
 {
 	size_t	n;
+	if (!a)
+		return(0);
 
 	n = 0;
 	while (*a)
@@ -25,7 +25,6 @@ size_t	ft_strlen(const char *a)
 }
 
 void	*ft_memcpy(void *dest, const void *src, size_t size)
-
 {
 	size_t	n;
 	char	*buff;
@@ -45,41 +44,18 @@ void	*ft_memcpy(void *dest, const void *src, size_t size)
 	return (dest);
 }
 
-void	ft_bzero(void *a, size_t size)
-{
-	size_t	n;
-	char	*b;
-
-	b = (char *)a;
-	n = 0;
-	while (n <= size - 1)
-	{
-		if (size <= 0)
-			break ;
-		b[n] = '\0';
-		n++;
-	}
-}
-
-void	*ft_calloc(size_t count, size_t size)
-{
-	void	*ret;
-
-	ret = (void *)malloc(count * size);
-	if (!ret)
-		return (0);
-	ft_bzero(ret, size * count);
-	return (ret);
-}
-
 char	*ft_strdup(const char *s1)
-
 {
 	int		n;
 	char	*ret;
-
-	n = ft_strlen(s1);
-	ret = malloc((n + 1) * sizeof(char));
+	if (!s1)
+		return(NULL);
+    n = 0;
+    while (s1[n] != '\0')
+    {
+        n++;
+    }
+    ret = malloc((n + 1) * sizeof(char));
 	if (!ret)
 		return (0);
 	ret = ft_memcpy(ret, s1, n + 1);
@@ -102,18 +78,50 @@ size_t	ft_strlcpy(char *dest, const char *src, size_t size)
 	return (len);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_substr(char const *s, unsigned int start, size_t len)
+{
+	char	*a;
+
+	if (start >= ft_strlen(s))
+	{
+		free((void *)s);
+		return (ft_strdup(""));
+	}
+	if (ft_strlen(&s[start]) < len)
+		len = ft_strlen(&s[start]);
+	a = calloc(len + 1, sizeof(char));
+	if (!a)
+	{
+		free((void *)s);
+		return (0);
+	}
+	ft_strlcpy(a, &s[start], len + (size_t)1);
+	return (a);
+}
+
+char	*ft_strjoin(char *s1, char const *s2)
 
 {
 	char	*ret;
 	int		n;
-
+	int len;
+	if (!s1)
+		s1 = ft_strdup("");
+	if (!s1)
+		return (NULL);
+	len = ft_strlen(s1);
 	n = -1;
 	if (*s1 == '\0' && *s2 == '\0')
+	{
+		free((void *)s1);
 		return (ft_strdup(""));
-	ret = ft_calloc(ft_strlen(s1) + ft_strlen(s2) + 1, sizeof(char));
+	}
+	ret = calloc(ft_strlen(s1) + ft_strlen(s2) + 1, sizeof(char));
 	if (!ret)
+	{
+		free((void *)s1);
 		return (0);
+	}
 	while (*s1 != '\0')
 	{
 		n++;
@@ -126,109 +134,123 @@ char	*ft_strjoin(char const *s1, char const *s2)
 		ret[n] = *s2;
 		s2++;
 	}
+	s1 = s1 - len;
 	return (ret);
 }
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+static int ft_check(char *s)
 {
-	char	*a;
-
-	if (start >= ft_strlen(s))
-		return (ft_strdup(""));
-	if (ft_strlen(&s[start]) < len)
-		len = ft_strlen(&s[start]);
-	a = ft_calloc(len + 1, sizeof(char));
-	if (!a)
-		return (0);
-	ft_strlcpy(a, &s[start], len + (size_t)1);
-	return (a);
+    int ret;
+    
+    ret = 0;
+    while (*s)
+    {
+        if (*s == '\n')
+        {
+            while (*s)
+            {
+                s++;
+                ret++;
+            }
+            if (ret == 0)
+                ret = 1;
+            return (ret);
+        }
+        s++;
+    }
+    return(0);
 }
 
-void	*ft_memchr(const void *s, int c, size_t size)
-
+char    *get_next_line(int fd)
 {
-	unsigned char	chr;
+    char *buffer;
+    static char *rest;
+    char *ret;
+    int diff_size;
 
-	chr = (unsigned char)c;
-	while (size > 0)
+    if (fd < 0)
+        return(NULL);
+    if (rest)
 	{
-		if (*(unsigned char *)s == chr)
-			return (((unsigned char *)++s));
-		size--;
-		s++;
+        ret = ft_strdup(rest);
+		ret++;
 	}
-	return (0);
+    else
+    {
+        ret = malloc((BUFFER_SIZE + 1) * sizeof(char));
+        if (read(fd, ret, BUFFER_SIZE) == -1)
+        {
+            free(ret);
+            return(NULL);
+        }
+    }
+    if (!ret)
+        return (NULL);
+    buffer = malloc((BUFFER_SIZE + 1) * sizeof(char));
+    if (!buffer)
+    {
+        free(ret);
+        return(NULL);
+    }
+    while (1)
+    {
+        if (ft_check(ret) == 1)
+            break;
+        if (ft_check(ret) > 1)
+        {
+            diff_size = ft_check(ret);
+            rest = malloc((diff_size + 1) * sizeof(char));
+			//printf("(%s %i %lu)", ret, diff_size, ft_strlen(ret));
+            rest = ft_substr(ret, (ft_strlen(ret) - diff_size), diff_size);
+            if (!rest)
+            {
+                free(buffer);
+                free(ret);
+                return(NULL);
+            }
+            ret = ft_substr(ret, 0, (ft_strlen(ret) - diff_size + 1));
+            break;
+        }
+        if (!read(fd, buffer, BUFFER_SIZE))
+            break;
+        ret = ft_strjoin(ret, buffer);
+    }
+    free(buffer);
+    if (!ret)
+    {
+        if (rest)
+            free(rest);
+        return(NULL);
+    }
+    ret[ft_strlen(ret)] = '\0';
+    return(ret);
 }
 
-void	*ft_memchr(const void *s, int c, size_t size)
-
+int main()
 {
-	unsigned char	chr;
-
-	chr = (unsigned char)c;
-	while (size > 0)
-	{
-		if (*(unsigned char *)s == chr)
-			return (((unsigned char *)++s));
-		size--;
-		s++;
-	}
-	return (0);
-}
-
-char	*ft_strchr(const char *a, int ch)
-
-{
-	return (ft_memchr(a, ch, ft_strlen(a) + 1));
-}
-
-char *get_next_line(int fd)
-{
-	char *buffer;
-	char *buffer_buffer;
-	static char *next;
-
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	buffer_buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));	
-	if (!read(fd, buffer, BUFFER_SIZE) && !next)
-		return(NULL); //falta hacer free
-	if (next)
-		buffer = next;
-	if (ft_strchr(buffer, '\n') == 0 || ft_strchr(buffer, '\0') == 0)
-	{
-		printf("buff<%s>", buffer);
-		while(ft_strchr(buffer, '\n') == 0 || ft_strchr(buffer, '\0') == 0)
-		{
-			if (!read(fd, buffer_buffer, BUFFER_SIZE))
-			{
-				printf("TEST");
-				break;
-			}
-			if (buffer_buffer == NULL)
-				break;
-			if (ft_strchr(buffer, '\n') == 0)
-				buffer = ft_strjoin(buffer, buffer_buffer);
-		}
-		next = ft_strdup(ft_strchr(buffer, '\n'));
-	}
-	else
-	{
-		//printf("<%s>", buffer);
-		next = ft_strdup(ft_strchr(buffer, '\n'));
-		buffer = ft_substr(buffer, 0, ft_strlen(buffer) - ft_strlen(next));
-	}
-	if (buffer_buffer)
-		free(buffer_buffer);
-	printf("<%s>", buffer);
-	return(buffer);
-}
-
-int main(void)
-{
-    int fd = open("test.txt", O_RDONLY);
+    int fd = open("example.txt", O_RDONLY);
     printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
     printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
     printf("%s", get_next_line(fd));
- 	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+    printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
+	printf("%s", get_next_line(fd));
 	printf("%s", get_next_line(fd));
 }
