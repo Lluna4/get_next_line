@@ -6,7 +6,7 @@
 # include <stdio.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE	(int)1042
+#  define BUFFER_SIZE	(int)1024
 # endif
 size_t	ft_strlen(const char *a)
 
@@ -81,7 +81,9 @@ size_t	ft_strlcpy(char *dest, const char *src, size_t size)
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	char	*a;
+	int index;
 
+	index = len+1;
 	if (start >= ft_strlen(s))
 	{
 		free((void *)s);
@@ -173,7 +175,12 @@ char    *get_next_line(int fd)
     if (rest)
 	{
         ret = ft_strdup(rest);
-		ret++;
+		free(rest);
+		if (!ret)
+		{
+			free(rest);
+			return(NULL);
+		}
 	}
     else
     {
@@ -184,8 +191,7 @@ char    *get_next_line(int fd)
             return(NULL);
         }
     }
-    if (!ret)
-        return (NULL);
+
     buffer = malloc((BUFFER_SIZE + 1) * sizeof(char));
     if (!buffer)
     {
@@ -199,7 +205,8 @@ char    *get_next_line(int fd)
         if (ft_check(ret) > 1)
         {
             diff_size = ft_check(ret);
-            rest = malloc((diff_size + 1) * sizeof(char));
+			if (rest)
+				free(rest);
 			//printf("(%s %i %lu)", ret, diff_size, ft_strlen(ret));
             rest = ft_substr(ret, (ft_strlen(ret) - diff_size), diff_size);
             if (!rest)
@@ -208,12 +215,32 @@ char    *get_next_line(int fd)
                 free(ret);
                 return(NULL);
             }
-            ret = ft_substr(ret, 0, (ft_strlen(ret) - diff_size + 1));
+			if (buffer)
+				free(buffer);
+			buffer = ft_strdup(ret);
+			if (!buffer)
+			{
+				free(ret);
+				free(rest);
+				return(NULL);
+			}
+			free(ret);
+            ret = ft_substr(buffer, 0, (ft_strlen(buffer) - diff_size + 1));
             break;
         }
         if (!read(fd, buffer, BUFFER_SIZE))
             break;
-        ret = ft_strjoin(ret, buffer);
+		if (rest)
+			free(rest);
+		rest = ft_strdup(ret);
+		if (!rest)
+		{
+			free(ret);
+			free(buffer);
+			return(NULL);
+		}
+		free(ret);
+        ret = ft_strjoin(rest, buffer);
     }
     free(buffer);
     if (!ret)
@@ -230,27 +257,5 @@ int main()
 {
     int fd = open("example.txt", O_RDONLY);
     printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-    printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-    printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-    printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
-	printf("%s", get_next_line(fd));
 	printf("%s", get_next_line(fd));
 }

@@ -88,6 +88,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 		return (0);
 	}
 	ft_strlcpy(a, &s[start], len + (size_t)1);
+	free((char *)s);
 	return (a);
 }
 
