@@ -1,80 +1,82 @@
 #include "get_next_line.h"
 
-char *ft_nl_test(char *buff, char **sobras)
+int test_nl_0l(char *buffer, size_t size)
 {
-    int index;
-    char *ret;
-
-    index = 0;
-    while (buff[index])
+    size_t index = 0;
+    while (index < size)
     {
-        if (buff[index] == '\n')
-        {
-            ret = malloc(index * sizeof(char) + 1);
-            if (!ret)
-            {
-                free(buff);
-                free(*sobras);
-                return(NULL);
-            }
-            ft_memcpy(ret, buff, index * sizeof(char));
-            ft_memcpy(*sobras, buff, ft_strlen(buff+index));
-            free(buff);
-            ret[BUFFER_SIZE] = '\0';
-            return(ret);
-        }
+        if (buffer[index] == '\n' || buffer[index] == '\0')
+            return 1;
         index++;
     }
-    return (NULL);
+    return 0;
 }
 
 char    *get_next_line(int fd)
 {
-    static char *sobras;
-    char *ret;
-    char *buff;
-    int index;
+    static char *permanence;
+    char *buffer;
+    struct linked_list *head = NULL;
+    int read_status = 0;
+    int first = 1;
 
-    if (sobras != NULL)
-        ft_memcpy(buff, sobras, sizeof(sobras));
+    if (!head)
+    {
+        return (NULL);
+    }
+
+    buffer = (char *)calloc(BUFFER_SIZE, sizeof(char));
+    if (permanence)
+    {
+        memcpy(buffer, permanence, strlen(permanence));
+        memset(permanence, 0, BUFFER_SIZE);
+    }
     else
     {
-        buff = malloc(BUFFER_SIZE * sizeof(char) + 1);
-        if (!buff)
-            return(NULL);
-        if (read(fd, buff, BUFFER_SIZE) == -1)
+        read_status = read(fd, buffer, BUFFER_SIZE);
+        if (read_status == -1)
         {
-            free(buff);
+            free(buffer);
+            free(head);
             return (NULL);
         }
-        sobras = malloc(BUFFER_SIZE * sizeof(char) + 1);
-    }   
-    index = 0;
-    //Comprueba si hay salto de linea
-    ret = malloc(index * sizeof(char) + 1);
-    ft_memcpy(ret, ft_nl_test(buff, &sobras), BUFFER_SIZE);
-    if (ret != NULL)
-    {
-        ret[BUFFER_SIZE] = '\0';
-        return(ret);
+        else if (read_status == 0 || test_nl_0l(buffer, strlen(buffer)) == 1)
+        {
+            free(head);
+            return (buffer);
+        }
     }
-    free(ret);
-    ret = malloc(index * sizeof(char) + 1);
+
+    struct linked_list *temp = head;
+
     while (1)
     {
-        ft_memcpy(ret, buff, BUFFER_SIZE + 1);
-        if (!read(fd, buff, BUFFER_SIZE + 1))
+        if (first == 1)
         {
-            free(buff);
-            free(sobras);
-            return(NULL);
+            head = malloc(sizeof(struct linked_list));
+            temp = head;
+            first = 0;
         }
-        ft_memcpy(ret, ft_nl_test(buff, &sobras), BUFFER_SIZE);
-        if (ret != NULL)
+        else
         {
-        ret[BUFFER_SIZE] = '\0';
-        return(ret);
+            temp->next = malloc(sizeof(struct linked_list));
+            temp = temp->next;
         }
-        ret = ft_strjoin(ret, buff);
+
+        read_status = read(fd, buffer, BUFFER_SIZE);
+        if (read_status == -1)
+        {
+            free(buffer);
+            free(head);
+            return (NULL);
+        }
+        else if (read_status == 0 || test_nl_0l(buffer, strlen(buffer)) == 1)
+        {
+            free(head);
+            return (buffer);
+        }
+        temp->data = strdup(buffer);
+        temp->next = NULL;
+        free(buffer);
     }
 }

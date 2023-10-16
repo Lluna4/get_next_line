@@ -5,15 +5,23 @@
 # include <unistd.h>
 # include <limits.h>
 # include <string.h>
+# include <fcntl.h>
+# include <stdio.h>
 
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE	(int)1024
+#  define BUFFER_SIZE	(int)1
 # endif
+//structs
+struct linked_list
+{
+    char *data;
+    struct linked_list *next;
+};
+
+
+
 // funciones aqui
-size_t	ft_strlen(const char *a);
-void	*ft_memcpy(void *dest, const void *src, size_t size);
-char	*ft_strdup(const char *s1);
-char	*ft_strjoin(char *s1, char const *s2);
-char	*ft_substr(char const *s, unsigned int start, size_t len);
+char	*ft_strjoin(char *s1, char const *s2, char **s3);
+void ft_memsetc(char **str, int start, int len);
 char    *get_next_line(int fd);
 #endif
