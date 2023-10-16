@@ -18,4 +18,4 @@ jobs:
     - name: reopen terminal
       run: source ~/.bashrc
     - name: run paco
-      run: paco -in
+      run: $HOME/francinette/tester.sh -in
